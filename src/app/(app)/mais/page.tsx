@@ -11,8 +11,8 @@ const MORE = ALL_ITEMS.filter((i) => ["/livros", "/estatisticas", "/erros", "/vo
 export default function MorePage() {
   return (
     <>
-      <PageHeader title="Mais" />
-      <ul className="divide-y divide-outline-variant overflow-hidden rounded-lg bg-surface-container-low">
+      <PageHeader eyebrow="Objectif B2" title="Mais" />
+      <ul className="divide-y divide-outline-variant overflow-hidden rounded-[24px] bg-surface-container-lowest ring-1 ring-outline-variant/60">
         {MORE.map((i) => (
           <li key={i.href}>
             <Link href={i.href} className="flex h-16 items-center gap-4 px-4 hover:bg-surface-container">

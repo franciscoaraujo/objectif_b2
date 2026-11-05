@@ -14,7 +14,7 @@ export default async function ErrorsPage() {
     .then(must<ErrorEntry[]>);
   return (
     <>
-      <PageHeader title="Caderno de erros" subtitle="Erro, forma correta e explicação. Marque o que já revisou." />
+      <PageHeader eyebrow="Revisão" title="Caderno de erros" subtitle="Erro, forma correta e explicação. Marque o que já revisou." />
       <ErrorsClient entries={entries} />
     </>
   );

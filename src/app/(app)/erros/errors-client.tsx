@@ -63,7 +63,7 @@ export function ErrorsClient({ entries }: { entries: ErrorEntry[] }) {
           action={entries.length === 0 ? <Button onClick={() => openForm()}>Registrar primeiro erro</Button> : undefined}
         />
       ) : (
-        <ul className="divide-y divide-outline-variant overflow-hidden rounded-lg bg-surface-container-low">
+        <ul className="divide-y divide-outline-variant overflow-hidden rounded-[24px] bg-surface-container-lowest ring-1 ring-outline-variant/60">
           {filtered.map((e) => (
             <ErrorRow key={e.id} entry={e} onEdit={() => openForm(e)} />
           ))}

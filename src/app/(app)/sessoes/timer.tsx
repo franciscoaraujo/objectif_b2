@@ -72,7 +72,7 @@ export function StudyTimer({ onFinish }: { onFinish: (minutes: number) => void }
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg bg-surface-container p-4">
+    <div className="flex flex-wrap items-center justify-between gap-4 rounded-[24px] bg-surface-container-lowest p-5 ring-1 ring-outline-variant/60">
       <div className="flex items-center gap-3">
         <Icon name="timer" className={state.running ? "text-primary" : "text-on-surface-variant"} />
         <div>

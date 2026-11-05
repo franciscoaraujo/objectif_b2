@@ -44,7 +44,7 @@ export default async function StatsPage() {
 
   return (
     <>
-      <PageHeader title="Estatísticas" subtitle="Volume de estudo e evolução nas provas." />
+      <PageHeader eyebrow="Seu progresso" title="Estatísticas" subtitle="Volume de estudo e evolução nas provas." />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {[
@@ -71,30 +71,30 @@ export default async function StatsPage() {
         </div>
       ) : (
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          <section className="rounded-lg bg-surface-container-low p-4">
+          <section className="rounded-[24px] bg-surface-container-lowest ring-1 ring-outline-variant/60 p-4">
             <SectionTitle>Horas por semana</SectionTitle>
             <WeeklyHoursChart data={weekly} goal={WEEKLY_GOAL_MIN / 60} />
           </section>
-          <section className="rounded-lg bg-surface-container-low p-4">
+          <section className="rounded-[24px] bg-surface-container-lowest ring-1 ring-outline-variant/60 p-4">
             <SectionTitle>Horas por habilidade</SectionTitle>
             <SkillHoursChart data={skillData} />
           </section>
         </div>
       )}
 
-      <h2 className="mt-8 mb-3 type-title-large">Evolução dos simulados</h2>
+      <h2 className="mt-8 mb-3 text-[18px] leading-6 font-semibold tracking-tight">Evolução dos simulados</h2>
       {exams.length === 0 ? (
         <EmptyState icon="show_chart" title="Nenhuma nota registrada" description="Registre notas em Provas para acompanhar a evolução." />
       ) : (
         <div className="grid gap-6 lg:grid-cols-2">
           {hasCoCe && (
-            <section className="rounded-lg bg-surface-container-low p-4">
+            <section className="rounded-[24px] bg-surface-container-lowest ring-1 ring-outline-variant/60 p-4">
               <SectionTitle>CO e CE (0–699)</SectionTitle>
               <ExamChart data={examRows} keys={["CO", "CE"]} max={699} colors={["var(--md-sys-color-primary)", "#8A5100"]} />
             </section>
           )}
           {hasEeEo && (
-            <section className="rounded-lg bg-surface-container-low p-4">
+            <section className="rounded-[24px] bg-surface-container-lowest ring-1 ring-outline-variant/60 p-4">
               <SectionTitle>EE e EO (0–20)</SectionTitle>
               <ExamChart data={examRows} keys={["EE", "EO"]} max={20} colors={["#A23B5C", "#00696B"]} />
             </section>

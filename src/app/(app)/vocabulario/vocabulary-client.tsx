@@ -181,7 +181,7 @@ function WordList({ words, now }: { words: VocabWord[]; now: string }) {
       ) : shown.length === 0 ? (
         <EmptyState icon="search_off" title="Nenhuma palavra encontrada" />
       ) : (
-        <ul className="divide-y divide-outline-variant overflow-hidden rounded-lg bg-surface-container-low">
+        <ul className="divide-y divide-outline-variant overflow-hidden rounded-[24px] bg-surface-container-lowest ring-1 ring-outline-variant/60">
           {shown.map((w) => (
             <li key={w.id} className="flex items-start gap-2 px-4 py-3">
               <div className="min-w-0 flex-1">

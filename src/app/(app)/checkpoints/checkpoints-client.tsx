@@ -33,7 +33,7 @@ export function CheckpointsClient({
         {checkpoints.length === 0 ? (
           <EmptyState icon="flag" title="Nenhum checkpoint cadastrado" />
         ) : (
-          <ol className="divide-y divide-outline-variant overflow-hidden rounded-lg bg-surface-container-low">
+          <ol className="divide-y divide-outline-variant overflow-hidden rounded-[24px] bg-surface-container-lowest ring-1 ring-outline-variant/60">
             {checkpoints.map((c) => (
               <CheckpointRow key={c.id} cp={c} today={today} onRecord={() => openExam({ checkpoint_id: c.id })} />
             ))}
@@ -58,7 +58,7 @@ export function CheckpointsClient({
             description="Registre as notas dos testes de fase e dos simulados para acompanhar a evolução."
           />
         ) : (
-          <div className="overflow-x-auto rounded-lg bg-surface-container-low">
+          <div className="overflow-x-auto rounded-[24px] bg-surface-container-lowest ring-1 ring-outline-variant/60">
             <table className="w-full min-w-[560px] text-left">
               <thead>
                 <tr className="border-b border-outline-variant text-on-surface-variant type-label-medium">

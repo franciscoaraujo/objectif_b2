@@ -63,6 +63,7 @@ export default async function HomePage() {
   return (
     <>
       <PageHeader
+        eyebrow="Rumo ao NCLC 7"
         title={notStarted ? "Antes da semana 1" : `Semana ${week} de ${TOTAL_WEEKS}`}
         subtitle={subtitle}
         actions={
@@ -128,7 +129,7 @@ export default async function HomePage() {
             />
           ) : (
             <>
-              <ul className="divide-y divide-outline-variant overflow-hidden rounded-lg bg-surface-container-low">
+              <ul className="divide-y divide-outline-variant overflow-hidden rounded-[24px] bg-surface-container-lowest ring-1 ring-outline-variant/60">
                 {blocks.map((b) => (
                   <li key={b.id} className="flex items-center gap-3 px-4 py-2">
                     <BlockCheck

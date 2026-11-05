@@ -10,7 +10,7 @@ export default async function VocabularyPage() {
   const words = await supabase.from("vocabulary").select("*").order("next_review_at").then(must<VocabWord[]>);
   return (
     <>
-      <PageHeader title="Vocabulário" subtitle="Palavras, gênero e revisão com repetição espaçada (SM-2)." />
+      <PageHeader eyebrow="Memorização" title="Vocabulário" subtitle="Palavras, gênero e revisão com repetição espaçada (SM-2)." />
       <VocabularyClient words={words} now={new Date().toISOString()} />
     </>
   );

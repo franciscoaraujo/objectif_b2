@@ -16,7 +16,7 @@ export default async function RoutinePage() {
   ]);
   return (
     <>
-      <PageHeader title="Rotina semanal" subtitle="Marque os blocos concluídos na semana atual." />
+      <PageHeader eyebrow="Planejamento" title="Rotina semanal" subtitle="Marque os blocos concluídos na semana atual." />
       <RoutineClient blocks={blocks} completions={completions} monday={monday} today={today} />
     </>
   );

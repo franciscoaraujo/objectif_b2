@@ -103,7 +103,7 @@ export function SessionsClient({
           action={sessions.length === 0 ? <Button onClick={() => openNew()}>Registrar estudo</Button> : undefined}
         />
       ) : (
-        <ul className="divide-y divide-outline-variant overflow-hidden rounded-lg bg-surface-container-low">
+        <ul className="divide-y divide-outline-variant overflow-hidden rounded-[24px] bg-surface-container-lowest ring-1 ring-outline-variant/60">
           {filtered.map((s) => {
             const mat = s.material_id ? matById.get(s.material_id) : undefined;
             const ch = s.chapter_id ? chapById.get(s.chapter_id) : undefined;

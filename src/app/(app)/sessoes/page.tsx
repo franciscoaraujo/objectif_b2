@@ -15,7 +15,7 @@ export default async function SessionsPage() {
   ]);
   return (
     <>
-      <PageHeader title="Sessões de estudo" subtitle="Registre o tempo estudado e acompanhe o histórico." />
+      <PageHeader eyebrow="Estudo" title="Sessões de estudo" subtitle="Registre o tempo estudado e acompanhe o histórico." />
       <SessionsClient sessions={sessions} materials={materials} chapters={chapters} today={todayISO()} />
     </>
   );

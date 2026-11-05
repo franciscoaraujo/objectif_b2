@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { NavigationBar, NavigationDrawer, NavigationRail } from "@/components/navigation";
+import { MobileTopBar, NavigationBar, NavigationDrawer, NavigationRail } from "@/components/navigation";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -15,9 +15,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="flex min-h-dvh">
       <NavigationRail />
       <NavigationDrawer email={data.user.email ?? ""} />
-      <main className="min-w-0 flex-1 px-4 pt-6 pb-28 md:px-8 md:pt-8 md:pb-10">
-        <div className="mx-auto w-full max-w-5xl">{children}</div>
-      </main>
+      <div className="min-w-0 flex-1">
+        <MobileTopBar />
+        <main className="px-4 pt-6 pb-28 md:px-8 md:pt-10 md:pb-12">
+          <div className="mx-auto w-full max-w-5xl">{children}</div>
+        </main>
+      </div>
       <NavigationBar />
     </div>
   );

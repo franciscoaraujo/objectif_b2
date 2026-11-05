@@ -13,7 +13,7 @@ export default async function BooksPage() {
   ]);
   return (
     <>
-      <PageHeader title="Livros e materiais" subtitle="Capítulos, status e progresso de cada material." />
+      <PageHeader eyebrow="Materiais" title="Livros e materiais" subtitle="Capítulos, status e progresso de cada material." />
       <BooksClient materials={materials} chapters={chapters} />
     </>
   );

@@ -15,6 +15,7 @@ export default async function CheckpointsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Provas"
         title="Checkpoints e simulados"
         subtitle="Testes de fim de fase, inscrição (semana 14) e simulados (semanas 20, 22, 24 e 26)."
       />

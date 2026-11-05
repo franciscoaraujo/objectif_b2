@@ -67,8 +67,8 @@ export function RoutineClient({
               <section
                 key={label}
                 aria-label={label}
-                className={`flex flex-col rounded-lg ${
-                  isToday ? "bg-secondary-container text-on-secondary-container" : "bg-surface-container-low"
+                className={`flex flex-col rounded-[24px] bg-surface-container-lowest ${
+                  isToday ? "ring-2 ring-[#D52B1E] shadow-lg shadow-[#D52B1E]/10" : "ring-1 ring-outline-variant/60"
                 }`}
               >
                 <header className="flex items-baseline justify-between gap-2 px-3 pt-3 pb-1">
@@ -127,7 +127,7 @@ export function RoutineClient({
         </div>
       )}
       <p className="mt-4 flex items-center gap-2 text-on-surface-variant type-body-small">
-        <Chip tone="primary">Hoje</Chip> destacado em azul. As marcações valem apenas para a semana atual.
+        <Chip tone="red">Hoje</Chip> destacado em vermelho. As marcações valem apenas para a semana atual.
       </p>
 
       <Dialog open={open} onClose={() => setOpen(false)} title="Novo bloco de estudo">

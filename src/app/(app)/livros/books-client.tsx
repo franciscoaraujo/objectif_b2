@@ -156,7 +156,7 @@ function MaterialCard({
   const ratio = chapters.length ? done / chapters.length : 0;
 
   return (
-    <details className="group overflow-hidden rounded-lg bg-surface-container-low" open={ongoing > 0}>
+    <details className="group overflow-hidden rounded-[24px] bg-surface-container-lowest ring-1 ring-outline-variant/60" open={ongoing > 0}>
       <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3 outline-none focus-visible:bg-surface-container [&::-webkit-details-marker]:hidden">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
