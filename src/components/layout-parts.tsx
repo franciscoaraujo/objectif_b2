@@ -138,3 +138,4 @@ export function PageSkeleton({ rows = 4 }: { rows?: number }) {
     </div>
   );
 }
+

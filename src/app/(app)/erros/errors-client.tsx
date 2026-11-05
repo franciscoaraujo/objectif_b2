@@ -119,3 +119,4 @@ function ErrorRow({ entry: e, onEdit }: { entry: ErrorEntry; onEdit: () => void 
     </li>
   );
 }
+

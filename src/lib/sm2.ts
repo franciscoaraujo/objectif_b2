@@ -23,3 +23,4 @@ export function sm2(state: Sm2State, q: Sm2Quality): Sm2State & { next_review_at
   const next = new Date(Date.now() + interval_days * 86_400_000);
   return { ease, repetitions, interval_days, next_review_at: next.toISOString() };
 }
+

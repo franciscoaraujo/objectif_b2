@@ -28,3 +28,4 @@ ${lines.join("\n")}
 `;
 fs.writeFileSync("src/app/tokens.css", css);
 console.log(`${lines.length} tokens gravados em src/app/tokens.css`);
+

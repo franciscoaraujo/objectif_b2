@@ -159,3 +159,4 @@ function CheckpointRow({ cp, today, onRecord }: { cp: Checkpoint; today: string;
     </li>
   );
 }
+

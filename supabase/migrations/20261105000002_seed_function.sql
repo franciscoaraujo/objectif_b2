@@ -77,3 +77,4 @@ end;
 $$;
 
 grant execute on function public.seed_user_data() to authenticated;
+

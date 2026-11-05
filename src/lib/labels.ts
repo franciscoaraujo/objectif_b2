@@ -80,3 +80,4 @@ export const GENDER_ARTICLE: Record<WordGender, string> = { m: "le", f: "la", m_
 
 export const WEEKDAY_LABEL = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 export const WEEKDAY_SHORT = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+

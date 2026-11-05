@@ -195,3 +195,4 @@ begin
     execute format('create policy "own_delete" on public.%I for delete to authenticated using (user_id = (select auth.uid()))', t);
   end loop;
 end $$;
+

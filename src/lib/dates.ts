@@ -70,3 +70,4 @@ export function formatDuration(min: number): string {
   return m === 0 ? `${h} h` : `${h} h ${String(m).padStart(2, "0")}`;
 }
 export const hours = (min: number) => Math.round((min / 60) * 10) / 10;
+

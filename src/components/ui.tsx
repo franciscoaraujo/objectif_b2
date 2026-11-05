@@ -16,7 +16,36 @@ type ButtonProps = {
   form?: string;
 };
 
-export function Button({ variant = "filled", icon, children, ...rest }: ButtonProps) {
+export function Button({
+  variant = "filled",
+  icon,
+  children,
+  type = "button",
+  onClick,
+  form,
+  ...rest
+}: ButtonProps) {
+  const handleClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (onClick) onClick();
+    if (type === "submit") {
+      const el = e.currentTarget;
+      const targetForm = form
+        ? (document.getElementById(form) as HTMLFormElement | null)
+        : (el as unknown as { form?: HTMLFormElement }).form || el.closest("form");
+      if (targetForm) {
+        let nativeSubmit = targetForm.querySelector<HTMLButtonElement>("button[data-native-submit]");
+        if (!nativeSubmit) {
+          nativeSubmit = document.createElement("button");
+          nativeSubmit.type = "submit";
+          nativeSubmit.setAttribute("data-native-submit", "");
+          nativeSubmit.style.display = "none";
+          targetForm.appendChild(nativeSubmit);
+        }
+        nativeSubmit.click();
+      }
+    }
+  };
+
   // Ícone no slot nativo do Material Web
   const withIcon = icon ? (
     <>
@@ -28,15 +57,24 @@ export function Button({ variant = "filled", icon, children, ...rest }: ButtonPr
   ) : (
     children
   );
+
+  // Passamos type="button" para o web component do Material Web para evitar
+  // que ele intercepte o evento 'submit' com um submitter CustomElement incompatível com React 19.
+  const props = {
+    ...rest,
+    type: "button" as const,
+    onClick: handleClick,
+  };
+
   switch (variant) {
     case "tonal":
-      return <md-filled-tonal-button {...rest}>{withIcon}</md-filled-tonal-button>;
+      return <md-filled-tonal-button {...props}>{withIcon}</md-filled-tonal-button>;
     case "outlined":
-      return <md-outlined-button {...rest}>{withIcon}</md-outlined-button>;
+      return <md-outlined-button {...props}>{withIcon}</md-outlined-button>;
     case "text":
-      return <md-text-button {...rest}>{withIcon}</md-text-button>;
+      return <md-text-button {...props}>{withIcon}</md-text-button>;
     default:
-      return <md-filled-button {...rest}>{withIcon}</md-filled-button>;
+      return <md-filled-button {...props}>{withIcon}</md-filled-button>;
   }
 }
 
@@ -57,9 +95,30 @@ export function IconButton({
   tonal?: boolean;
   form?: string;
 }) {
+  const handleClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (onClick) onClick();
+    if (type === "submit") {
+      const el = e.currentTarget;
+      const targetForm = form
+        ? (document.getElementById(form) as HTMLFormElement | null)
+        : (el as unknown as { form?: HTMLFormElement }).form || el.closest("form");
+      if (targetForm) {
+        let nativeSubmit = targetForm.querySelector<HTMLButtonElement>("button[data-native-submit]");
+        if (!nativeSubmit) {
+          nativeSubmit = document.createElement("button");
+          nativeSubmit.type = "submit";
+          nativeSubmit.setAttribute("data-native-submit", "");
+          nativeSubmit.style.display = "none";
+          targetForm.appendChild(nativeSubmit);
+        }
+        nativeSubmit.click();
+      }
+    }
+  };
+
   const Tag = tonal ? "md-filled-tonal-icon-button" : "md-icon-button";
   return (
-    <Tag aria-label={label} title={label} onClick={onClick} disabled={disabled} type={type} form={form}>
+    <Tag aria-label={label} title={label} onClick={handleClick} disabled={disabled} type="button" form={form}>
       <span className="msym" aria-hidden="true">
         {icon}
       </span>
@@ -179,7 +238,11 @@ export function Progress({ value, label }: { value: number; label?: string }) {
     <md-linear-progress
       aria-label={label ?? "Progresso"}
       value={Math.min(1, Math.max(0, value))}
-      style={{ width: "100%", ["--md-linear-progress-track-height" as string]: "6px", ["--md-linear-progress-active-indicator-height" as string]: "6px" }}
+      style={{
+        width: "100%",
+        ["--md-linear-progress-track-height" as string]: "6px",
+        ["--md-linear-progress-active-indicator-height" as string]: "6px",
+      }}
     />
   );
 }
@@ -246,6 +309,8 @@ export function ActionForm({
 
   return (
     <form action={formAction} className={`flex flex-col gap-4 ${className}`}>
+      {/* Botão nativo invisível para garantir compatibilidade com submit do React 19 e tecla Enter */}
+      <button type="submit" data-native-submit style={{ display: "none" }} aria-hidden="true" tabIndex={-1} />
       {children}
       {state && !state.ok && (
         <div

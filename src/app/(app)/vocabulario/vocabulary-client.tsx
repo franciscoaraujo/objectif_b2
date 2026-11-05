@@ -221,3 +221,4 @@ function WordList({ words, now }: { words: VocabWord[]; now: string }) {
     </>
   );
 }
+

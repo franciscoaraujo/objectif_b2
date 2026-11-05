@@ -9,3 +9,4 @@ export default function RouteError({ error, reset }: { error: Error & { digest?:
   }, [error]);
   return <ErrorState message="Ocorreu um erro ao carregar esta tela. Verifique sua conexão e tente novamente." onRetry={reset} />;
 }
+

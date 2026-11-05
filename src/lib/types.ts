@@ -93,3 +93,4 @@ export type VocabWord = {
   interval_days: number;
   next_review_at: string;
 };
+

@@ -41,3 +41,4 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     </main>
   );
 }
+

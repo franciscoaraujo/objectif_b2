@@ -237,3 +237,4 @@ function ChapterRow({ chapter: c, onEdit }: { chapter: Chapter; onEdit: () => vo
     </li>
   );
 }
+
