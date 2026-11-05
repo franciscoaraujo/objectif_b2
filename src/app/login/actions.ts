@@ -25,11 +25,12 @@ export async function signIn(_: ActionState, formData: FormData): Promise<Action
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) {
-    const msg =
-      error.message === "Email not confirmed"
-        ? "Confirme seu e-mail antes de entrar (verifique a caixa de entrada)."
-        : "E-mail ou senha incorretos.";
-    return { ok: false, message: msg };
+    const messages: Record<string, string> = {
+      email_not_confirmed: "Confirme seu e-mail antes de entrar (verifique a caixa de entrada).",
+      invalid_credentials: "E-mail ou senha incorretos.",
+      over_request_rate_limit: "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
+    };
+    return { ok: false, message: messages[error.code ?? ""] ?? "Não foi possível entrar. Tente novamente." };
   }
   redirect("/");
 }
@@ -45,7 +46,18 @@ export async function signUp(_: ActionState, formData: FormData): Promise<Action
     ...parsed.data,
     options: { emailRedirectTo: `${origin}/auth/callback` },
   });
-  if (error) return { ok: false, message: error.message };
+  if (error) {
+    const messages: Record<string, string> = {
+      over_email_send_rate_limit: "Muitas tentativas de cadastro. Aguarde alguns minutos e tente novamente.",
+      over_request_rate_limit: "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
+      user_already_exists: "Já existe uma conta com este e-mail.",
+      email_exists: "Já existe uma conta com este e-mail.",
+      weak_password: "Senha muito fraca. Escolha uma senha mais forte.",
+      email_address_invalid: "Este e-mail não é aceito. Use outro endereço.",
+      signup_disabled: "O cadastro de novas contas está desativado.",
+    };
+    return { ok: false, message: messages[error.code ?? ""] ?? "Não foi possível criar a conta. Tente novamente." };
+  }
   if (!data.session) {
     return { ok: false, message: "Conta criada. Enviamos um link de confirmação para o seu e-mail." };
   }

@@ -56,7 +56,7 @@ export function RoutineClient({
           action={<Button onClick={() => show(1)}>Criar bloco</Button>}
         />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-7">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {WEEKDAY_LABEL.map((label, i) => {
             const weekdayN = i + 1;
             const date = addDays(monday, i);
@@ -92,10 +92,10 @@ export function RoutineClient({
                       />
                       <div className="min-w-0 flex-1">
                         <p
-                          className={`flex items-center gap-1 type-label-large ${done.has(b.id) ? "line-through opacity-60" : ""}`}
+                          className={`flex min-w-0 items-center gap-1 type-label-large ${done.has(b.id) ? "line-through opacity-60" : ""}`}
                         >
-                          <Icon name={SKILL_ICON[b.skill]} size={16} />
-                          {SKILL_LABEL[b.skill]}
+                          <Icon name={SKILL_ICON[b.skill]} size={16} className="shrink-0" />
+                          <span className="truncate">{SKILL_LABEL[b.skill]}</span>
                         </p>
                         <p className="truncate type-body-small opacity-70" title={b.description}>
                           {formatDuration(b.duration_min)}

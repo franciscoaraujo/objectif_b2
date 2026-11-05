@@ -109,6 +109,11 @@ body {
   user-select: none;
 }
 .msym-fill { font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24; }
+/* Ícone dentro de botões M3: 18px (o slot herda o tamanho daqui, não do :host). */
+.msym[slot="icon"] {
+  font-size: 18px;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 20;
+}
 
 /* Skeleton */
 @keyframes skeleton {
@@ -128,4 +133,59 @@ md-outlined-text-field,
 md-outlined-select,
 md-filled-select {
   width: 100%;
+}
+
+/*
+ * O preflight do Tailwind aplica `* { margin: 0; padding: 0; border: 0 solid }`.
+ * Estilos da página vencem os `:host` do shadow DOM, então o reset zerava o
+ * espaçamento interno dos componentes Material (botões sem padding, ícones
+ * desalinhados). `revert-layer` descarta o reset e devolve o controle ao :host.
+ * Utilitários do Tailwind (layer utilities) continuam funcionando normalmente.
+ */
+@layer base {
+  :where(
+      md-filled-button,
+      md-filled-tonal-button,
+      md-outlined-button,
+      md-text-button,
+      md-elevated-button,
+      md-icon-button,
+      md-filled-icon-button,
+      md-filled-tonal-icon-button,
+      md-outlined-icon-button,
+      md-outlined-text-field,
+      md-filled-text-field,
+      md-outlined-select,
+      md-filled-select,
+      md-select-option,
+      md-checkbox,
+      md-radio,
+      md-switch,
+      md-linear-progress,
+      md-circular-progress,
+      md-dialog,
+      md-divider,
+      md-chip-set,
+      md-filter-chip,
+      md-assist-chip,
+      md-input-chip,
+      md-suggestion-chip,
+      md-list,
+      md-list-item,
+      md-menu,
+      md-menu-item,
+      md-tabs,
+      md-primary-tab,
+      md-secondary-tab,
+      md-fab
+    ) {
+    margin: revert-layer;
+    padding: revert-layer;
+    border: revert-layer;
+  }
+  /* Mesmo problema com `::slotted()` (ex.: título, conteúdo e ações do md-dialog). */
+  :where([slot]) {
+    margin: revert-layer;
+    padding: revert-layer;
+  }
 }

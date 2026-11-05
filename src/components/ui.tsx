@@ -60,10 +60,13 @@ export function Button({
 
   // Passamos type="button" para o web component do Material Web para evitar
   // que ele intercepte o evento 'submit' com um submitter CustomElement incompatível com React 19.
+  // `has-icon` é refletido pelo próprio componente no navegador; renderizar já no
+  // servidor evita aviso de hidratação.
   const props = {
     ...rest,
     type: "button" as const,
     onClick: handleClick,
+    ...(icon ? { "has-icon": true } : {}),
   };
 
   switch (variant) {
@@ -203,12 +206,12 @@ export function SelectField({
   return (
     <md-outlined-select ref={ref} name={name} label={label} value={defaultValue ?? ""} required={required}>
       {allowEmpty && (
-        <md-select-option value="">
+        <md-select-option value="" md-menu-item="">
           <div slot="headline">{allowEmpty}</div>
         </md-select-option>
       )}
       {options.map((o) => (
-        <md-select-option key={o.value} value={o.value}>
+        <md-select-option key={o.value} value={o.value} md-menu-item="">
           <div slot="headline">{o.label}</div>
         </md-select-option>
       ))}
@@ -308,8 +311,25 @@ export function ActionForm({
   }, [state]);
 
   return (
-    <form action={formAction} className={`flex flex-col gap-4 ${className}`}>
-      {/* Botão nativo invisível para garantir compatibilidade com submit do React 19 e tecla Enter */}
+    <form
+      action={formAction}
+      className={`flex flex-col gap-4 ${className}`}
+      onKeyDown={(e) => {
+        // O <input> do md-outlined-text-field fica no shadow DOM, então o navegador
+        // não faz o envio implícito com Enter. Fazemos manualmente (exceto em textarea).
+        const target = e.target as HTMLElement & { type?: string };
+        if (
+          e.key === "Enter" &&
+          !e.nativeEvent.isComposing &&
+          target.tagName === "MD-OUTLINED-TEXT-FIELD" &&
+          target.type !== "textarea"
+        ) {
+          e.preventDefault();
+          e.currentTarget.requestSubmit();
+        }
+      }}
+    >
+      {/* Botão nativo invisível para garantir compatibilidade com submit do React 19 */}
       <button type="submit" data-native-submit style={{ display: "none" }} aria-hidden="true" tabIndex={-1} />
       {children}
       {state && !state.ok && (
