@@ -10,6 +10,16 @@ Início · Sessões (com cronômetro) · Livros · Rotina · Checkpoints e simul
 
 Navegação: *navigation bar* no celular (5 destinos; "Mais" reúne Livros, Estatísticas, Erros e Vocabulário), *navigation rail* no tablet (≥ 768 px) e *navigation drawer* no desktop (≥ 1280 px).
 
+### Planejado (ainda não implementado)
+
+> **Livros — PDF + IA:** no item **Livros**, permitir adicionar livros em PDF e usar uma IA para gerar, a partir do conteúdo do livro:
+>
+> - **Exercícios** (por capítulo ou tema);
+> - **Áudios** (para treinar a compreensão oral);
+> - **Simulações** (no formato do TCF Canada).
+>
+> Observação apenas de planejamento — nada disso foi implementado ainda.
+
 ## 1. Criar o projeto no Supabase
 
 1. Em <https://supabase.com/dashboard>, crie um projeto novo e guarde a senha do banco.
