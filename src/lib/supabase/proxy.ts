@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/auth"];
+const PUBLIC_PATHS = ["/login", "/auth", "/conheca"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -31,6 +31,12 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const isPublic = PUBLIC_PATHS.some((p) => request.nextUrl.pathname.startsWith(p));
 
+  // Visitante sem sessão em "/" vê a página de vendas (URL continua "/").
+  if (!data?.claims && request.nextUrl.pathname === "/") {
+    const landing = request.nextUrl.clone();
+    landing.pathname = "/conheca";
+    return NextResponse.rewrite(landing);
+  }
   if (!data?.claims && !isPublic) {
     const redirect = request.nextUrl.clone();
     redirect.pathname = "/login";
