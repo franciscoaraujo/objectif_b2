@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { deleteMockExam, saveMockExam, toggleCheckpoint } from "@/app/actions";
-import { ActionForm, Button, Dialog, IconButton, TextField } from "@/components/ui";
+import { deleteMockExam, saveCheckpointDate, saveMockExam, toggleCheckpoint } from "@/app/actions";
+import { ActionForm, Button, DateField, Dialog, IconButton, TextField } from "@/components/ui";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { Chip, EmptyState, SectionTitle } from "@/components/layout-parts";
 import { Icon } from "@/components/icon";
@@ -24,6 +24,9 @@ export function CheckpointsClient({
   const [dlg, setDlg] = useState<{ open: boolean; draft: Draft; key: number }>({ open: false, draft: {}, key: 0 });
   const openExam = (draft: Draft = {}) => setDlg((d) => ({ open: true, draft, key: d.key + 1 }));
   const close = () => setDlg((d) => ({ ...d, open: false }));
+  const [dateDlg, setDateDlg] = useState<{ open: boolean; cp: Checkpoint | null; key: number }>({ open: false, cp: null, key: 0 });
+  const openDate = (cp: Checkpoint) => setDateDlg((d) => ({ open: true, cp, key: d.key + 1 }));
+  const closeDate = () => setDateDlg((d) => ({ ...d, open: false }));
   const cpById = new Map(checkpoints.map((c) => [c.id, c]));
 
   return (
@@ -35,7 +38,13 @@ export function CheckpointsClient({
         ) : (
           <ol className="divide-y divide-outline-variant overflow-hidden rounded-[24px] bg-surface-container-lowest ring-1 ring-outline-variant/60">
             {checkpoints.map((c) => (
-              <CheckpointRow key={c.id} cp={c} today={today} onRecord={() => openExam({ checkpoint_id: c.id })} />
+              <CheckpointRow
+                key={c.id}
+                cp={c}
+                today={today}
+                onRecord={() => openExam({ checkpoint_id: c.id })}
+                onEditDate={() => openDate(c)}
+              />
             ))}
           </ol>
         )}
@@ -119,11 +128,38 @@ export function CheckpointsClient({
           <TextField name="notes" label="Observações" type="textarea" rows={3} defaultValue={dlg.draft.notes} />
         </ActionForm>
       </Dialog>
+
+      <Dialog open={dateDlg.open} onClose={closeDate} title="Alterar data">
+        {dateDlg.cp && (
+          <ActionForm key={dateDlg.key} action={saveCheckpointDate} onDone={closeDate} onCancel={closeDate}>
+            <input type="hidden" name="id" value={dateDlg.cp.id} />
+            <p className="type-title-small">{dateDlg.cp.title}</p>
+            <DateField
+              name="date"
+              label="Data"
+              required
+              min={dateDlg.cp.date < today ? dateDlg.cp.date : today}
+              defaultValue={dateDlg.cp.date}
+              supporting="Hoje ou uma data futura. A semana do plano é recalculada a partir dela."
+            />
+          </ActionForm>
+        )}
+      </Dialog>
     </>
   );
 }
 
-function CheckpointRow({ cp, today, onRecord }: { cp: Checkpoint; today: string; onRecord: () => void }) {
+function CheckpointRow({
+  cp,
+  today,
+  onRecord,
+  onEditDate,
+}: {
+  cp: Checkpoint;
+  today: string;
+  onRecord: () => void;
+  onEditDate: () => void;
+}) {
   const [pending, start] = useTransition();
   const days = diffDays(today, cp.date);
   const canScore = cp.type !== "inscricao";
@@ -151,6 +187,7 @@ function CheckpointRow({ cp, today, onRecord }: { cp: Checkpoint; today: string;
           {!cp.done && (days > 0 ? ` · em ${days} dias` : days === 0 ? " · hoje" : ` · atrasado há ${-days} dias`)}
         </p>
       </div>
+      <IconButton icon="edit_calendar" label={`Alterar data de ${cp.title}`} onClick={onEditDate} />
       {canScore && (
         <Button variant="text" icon="edit_note" onClick={onRecord}>
           Notas

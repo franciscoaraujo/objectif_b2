@@ -1,5 +1,7 @@
 // Aplica as migrações de supabase/migrations em ordem.
 // Uso: defina DATABASE_URL (string de conexão Postgres do Supabase) e rode `npm run db:migrate`.
+// `npm run db:migrate -- --reset` executa antes supabase/reset.sql (APAGA os dados do app).
+// O TLS é verificado com a CA raiz da Supabase (supabase/prod-ca-2021.crt).
 // Atenção: caracteres especiais na senha precisam estar codificados (ex.: % -> %25, @ -> %40).
 import pg from "pg";
 import fs from "node:fs";
@@ -14,8 +16,14 @@ if (!url) {
 const dir = path.join(process.cwd(), "supabase", "migrations");
 const files = fs.readdirSync(dir).filter((f) => f.endsWith(".sql")).sort();
 
-const client = new pg.Client({ connectionString: url, ssl: { rejectUnauthorized: false } });
+const ca = fs.readFileSync(path.join(process.cwd(), "supabase", "prod-ca-2021.crt"), "utf8");
+const client = new pg.Client({ connectionString: url, ssl: { rejectUnauthorized: true, ca } });
 await client.connect();
+
+if (process.argv.includes("--reset")) {
+  await client.query(fs.readFileSync(path.join(process.cwd(), "supabase", "reset.sql"), "utf8"));
+  console.log("! banco do app zerado (supabase/reset.sql)");
+}
 await client.query(
   "create table if not exists public._app_migrations (name text primary key, applied_at timestamptz not null default now())",
 );

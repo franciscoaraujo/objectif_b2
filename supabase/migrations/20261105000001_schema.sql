@@ -34,6 +34,17 @@ do $$ begin
 exception when duplicate_object then null; end $$;
 
 -- ───────────────────────── Tabelas ─────────────────────────
+-- Perfil: datas definidas pelo próprio aluno no primeiro acesso (tela /comecar).
+create table if not exists public.profiles (
+  user_id          uuid primary key default auth.uid() references auth.users (id) on delete cascade,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now(),
+  plan_start       date not null,
+  exam_date        date,
+  weekly_goal_min  integer not null default 1200 check (weekly_goal_min between 60 and 4200),
+  check (exam_date is null or exam_date >= plan_start)
+);
+
 create table if not exists public.phases (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null default auth.uid() references auth.users (id) on delete cascade,
@@ -181,7 +192,7 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'phases','materials','chapters','study_sessions','weekly_blocks',
+    'profiles','phases','materials','chapters','study_sessions','weekly_blocks',
     'block_completions','checkpoints','mock_exams','error_log','vocabulary'
   ] loop
     execute format('alter table public.%I enable row level security', t);

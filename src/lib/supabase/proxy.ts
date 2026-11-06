@@ -1,10 +1,22 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/auth", "/conheca"];
+const PUBLIC_PATHS = ["/login", "/auth", "/conheca", "/confirmar-email"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
+
+  // Rede de segurança: se o Supabase devolver o link do e-mail para a raiz
+  // (Redirect URL não autorizada cai na Site URL), conclui a confirmação na rota certa.
+  if (request.nextUrl.pathname === "/") {
+    const params = request.nextUrl.searchParams;
+    if (params.has("token_hash") || params.has("code")) {
+      const target = request.nextUrl.clone();
+      target.pathname = params.has("token_hash") ? "/auth/confirm" : "/auth/callback";
+      if (!params.has("next")) target.searchParams.set("next", "/email-confirmado");
+      return NextResponse.redirect(target);
+    }
+  }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

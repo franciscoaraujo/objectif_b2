@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useId, useRef, useState } from "react";
 import { useActionState } from "react";
 import { Icon } from "./icon";
 
@@ -178,6 +178,108 @@ export function TextField({
   );
 }
 
+/**
+ * Campo de data com botão de calendário sempre visível.
+ * Usa <input type="date"> nativo (o md-outlined-text-field esconde o seletor quando vazio):
+ * `min`/`max` desabilitam os dias fora do intervalo no calendário e bloqueiam o envio.
+ */
+export function DateField({
+  name,
+  label,
+  defaultValue,
+  required,
+  min,
+  max,
+  supporting,
+}: {
+  name: string;
+  label: string;
+  defaultValue?: string | null;
+  required?: boolean;
+  min?: string;
+  max?: string;
+  supporting?: string;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  const id = useId();
+  const [error, setError] = useState<string | null>(null);
+
+  const open = () => {
+    try {
+      ref.current?.showPicker();
+    } catch {
+      ref.current?.focus();
+    }
+  };
+  const messageFor = (el: HTMLInputElement) =>
+    el.validity.valueMissing
+      ? "Preencha este campo."
+      : el.validity.rangeUnderflow
+        ? "Escolha hoje ou uma data futura."
+        : el.validity.rangeOverflow
+          ? "Data acima do limite permitido."
+          : el.validity.badInput
+            ? "Data inválida."
+            : null;
+  const help = error ?? supporting;
+
+  return (
+    <div className="flex flex-col gap-1">
+      <fieldset
+        className={`group flex h-14 items-center rounded-[4px] pb-1 transition-colors ${
+          error
+            ? "border-2 border-error px-[11px]"
+            : "border border-outline px-3 hover:border-on-surface focus-within:border-2 focus-within:border-primary focus-within:px-[11px]"
+        }`}
+      >
+        <legend
+          className={`px-1 text-[12px] leading-4 ${error ? "text-error" : "text-on-surface-variant group-focus-within:text-primary"}`}
+        >
+          <label htmlFor={id}>
+            {label}
+            {required && "*"}
+          </label>
+        </legend>
+        <input
+          ref={ref}
+          id={id}
+          type="date"
+          name={name}
+          defaultValue={defaultValue ?? ""}
+          required={required}
+          min={min}
+          max={max}
+          aria-invalid={!!error}
+          aria-describedby={help ? `${id}-help` : undefined}
+          onClick={open}
+          onInvalid={(e) => {
+            e.preventDefault();
+            setError(messageFor(e.currentTarget));
+            e.currentTarget.focus();
+          }}
+          onChange={(e) => setError(error ? messageFor(e.currentTarget) : null)}
+          className="h-full min-w-0 flex-1 cursor-pointer bg-transparent text-[16px] text-on-surface outline-none [&::-webkit-calendar-picker-indicator]:hidden"
+        />
+        <button
+          type="button"
+          onClick={open}
+          aria-label={`Abrir calendário: ${label}`}
+          className={`-mr-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full hover:bg-surface-container-high ${
+            error ? "text-error" : "text-on-surface-variant group-focus-within:text-primary"
+          }`}
+        >
+          <Icon name="calendar_month" />
+        </button>
+      </fieldset>
+      {help && (
+        <p id={`${id}-help`} className={`px-4 type-body-small ${error ? "text-error" : "text-on-surface-variant"}`}>
+          {help}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function SelectField({
   name,
   label,
@@ -292,6 +394,7 @@ export function ActionForm({
   onCancel,
   submitIcon,
   className = "",
+  pendingLabel = "Salvando…",
 }: {
   action: FormAction;
   children: React.ReactNode;
@@ -300,19 +403,30 @@ export function ActionForm({
   onCancel?: () => void;
   submitIcon?: string;
   className?: string;
+  pendingLabel?: string;
 }) {
   const [state, formAction, pending] = useActionState(action, null);
   const done = useRef(onDone);
+  const formRef = useRef<HTMLFormElement>(null);
   useEffect(() => {
     done.current = onDone;
   });
   useEffect(() => {
-    if (state?.ok) done.current?.();
+    if (!state?.ok) return;
+    // Limpa só após sucesso; em caso de erro o aluno não perde o que digitou.
+    formRef.current?.reset();
+    done.current?.();
   }, [state]);
 
   return (
     <form
-      action={formAction}
+      ref={formRef}
+      // Envio manual: com `action={...}` o React 19 limpa o formulário mesmo quando o servidor devolve erro.
+      onSubmit={(e) => {
+        e.preventDefault();
+        const data = new FormData(e.currentTarget);
+        startTransition(() => formAction(data));
+      }}
       className={`flex flex-col gap-4 ${className}`}
       onKeyDown={(e) => {
         // O <input> do md-outlined-text-field fica no shadow DOM, então o navegador
@@ -350,6 +464,15 @@ export function ActionForm({
           </div>
         </div>
       )}
+      {state?.ok && state.message && (
+        <div
+          role="status"
+          className="flex items-start gap-2 rounded-md bg-[#d7ecd3] px-3 py-2 text-[#0f3a14] type-body-medium"
+        >
+          <Icon name="check_circle" size={20} />
+          {state.message}
+        </div>
+      )}
       <div className="flex justify-end gap-2">
         {onCancel && (
           <Button variant="text" onClick={onCancel}>
@@ -357,7 +480,7 @@ export function ActionForm({
           </Button>
         )}
         <Button type="submit" disabled={pending} icon={submitIcon}>
-          {pending ? "Salvando…" : submitLabel}
+          {pending ? pendingLabel : submitLabel}
         </Button>
       </div>
     </form>

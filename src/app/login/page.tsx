@@ -102,7 +102,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             <div className="p-6 md:p-8">
               {erro && (
                 <p role="alert" className="mb-4 rounded-md bg-error-container px-3 py-2 text-on-error-container type-body-medium">
-                  Não foi possível confirmar o e-mail. Tente entrar novamente.
+                  {erro === "link"
+                    ? "O link de redefinição expirou ou já foi usado. Peça um novo em “Esqueci minha senha”."
+                    : "Não foi possível confirmar o e-mail. Tente entrar novamente."}
                 </p>
               )}
               <LoginForm configError={configError} initialMode={modo === "criar" ? "criar" : "entrar"} />

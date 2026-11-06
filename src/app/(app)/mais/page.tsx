@@ -6,7 +6,7 @@ import { signOut } from "@/app/login/actions";
 
 export const metadata = { title: "Mais" };
 
-const MORE = ALL_ITEMS.filter((i) => ["/livros", "/estatisticas", "/erros", "/vocabulario"].includes(i.href));
+const MORE = ALL_ITEMS.filter((i) => ["/livros", "/estatisticas", "/erros", "/vocabulario", "/perfil"].includes(i.href));
 
 export default function MorePage() {
   return (

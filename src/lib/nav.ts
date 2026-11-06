@@ -9,4 +9,5 @@ export const ALL_ITEMS: NavItem[] = [
   { href: "/estatisticas", label: "Estatísticas", icon: "monitoring" },
   { href: "/erros", label: "Caderno de erros", icon: "spellcheck" },
   { href: "/vocabulario", label: "Vocabulário", icon: "style" },
+  { href: "/perfil", label: "Meu plano", icon: "tune" },
 ];

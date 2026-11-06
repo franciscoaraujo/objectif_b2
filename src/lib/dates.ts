@@ -1,9 +1,7 @@
 // Datas do plano. Todas as datas são strings ISO "YYYY-MM-DD" tratadas em UTC
-// para evitar deslocamento de fuso.
-export const PLAN_START = "2026-11-09"; // segunda-feira, semana 1
-export const PLAN_END = "2027-05-09"; // domingo, fim da semana 26
+// para evitar deslocamento de fuso. A data de início é escolhida pelo aluno
+// (`profiles.plan_start`, qualquer dia da semana).
 export const TOTAL_WEEKS = 26;
-export const WEEKLY_GOAL_MIN = 20 * 60;
 
 const DAY = 86_400_000;
 
@@ -34,14 +32,15 @@ export function weekdayOf(s: string): number {
   return ((parseISO(s).getUTCDay() + 6) % 7) + 1;
 }
 /** Semana do plano (1..26). Retorna 0 antes do início e 27 após o fim. */
-export function planWeek(s: string): number {
-  const w = Math.floor(diffDays(PLAN_START, s) / 7) + 1;
+export function planWeek(s: string, planStart: string): number {
+  const w = Math.floor(diffDays(planStart, s) / 7) + 1;
   if (w < 1) return 0;
   if (w > TOTAL_WEEKS) return TOTAL_WEEKS + 1;
   return w;
 }
-export function weekStartDate(week: number): string {
-  return addDays(PLAN_START, (week - 1) * 7);
+/** Último dia (domingo) da semana 26. */
+export function planEnd(planStart: string): string {
+  return addDays(planStart, TOTAL_WEEKS * 7 - 1);
 }
 
 export function phaseForWeek<T extends { week_start: number; week_end: number }>(

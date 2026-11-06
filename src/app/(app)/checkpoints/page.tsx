@@ -9,7 +9,7 @@ export const metadata = { title: "Checkpoints e simulados" };
 export default async function CheckpointsPage() {
   const supabase = await createClient();
   const [checkpoints, exams] = await Promise.all([
-    supabase.from("checkpoints").select("*").order("week").then(must<Checkpoint[]>),
+    supabase.from("checkpoints").select("*").order("date").then(must<Checkpoint[]>),
     supabase.from("mock_exams").select("*").order("date", { ascending: false }).then(must<MockExam[]>),
   ]);
   return (
@@ -17,7 +17,7 @@ export default async function CheckpointsPage() {
       <PageHeader
         eyebrow="Provas"
         title="Checkpoints e simulados"
-        subtitle="Testes de fim de fase, inscrição (semana 14) e simulados (semanas 20, 22, 24 e 26)."
+        subtitle="Testes de fim de fase, inscrição e simulados. As datas são suas: ajuste cada uma quando quiser."
       />
       <CheckpointsClient checkpoints={checkpoints} exams={exams} today={todayISO()} />
     </>

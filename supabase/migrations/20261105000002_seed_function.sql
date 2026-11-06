@@ -1,7 +1,14 @@
--- Seed idempotente chamado no primeiro login: select public.seed_user_data();
--- Plano: 09/11/2026 (segunda) a 09/05/2027, 26 semanas.
+-- Monta o plano do aluno com as datas que ELE escolheu (tela /comecar).
+-- Idempotente: se o perfil já existe, não faz nada.
+-- Semana N vai de plan_start + (N-1)*7 até plan_start + N*7 - 1.
 
-create or replace function public.seed_user_data()
+drop function if exists public.seed_user_data();
+
+create or replace function public.seed_user_data(
+  p_plan_start date,
+  p_exam_date date default null,
+  p_weekly_goal_min integer default 1200
+)
 returns boolean
 language plpgsql
 security invoker
@@ -9,15 +16,21 @@ set search_path = public
 as $$
 declare
   uid uuid := auth.uid();
-  plan_start date := date '2026-11-09';
+  plan_start date := p_plan_start;
 begin
   if uid is null then
     raise exception 'Usuário não autenticado';
   end if;
-
-  if exists (select 1 from phases where user_id = uid) then
-    return false; -- já semeado
+  if p_plan_start is null then
+    raise exception 'Informe a data de início do plano';
   end if;
+
+  if exists (select 1 from profiles where user_id = uid) then
+    return false; -- já configurado
+  end if;
+
+  insert into profiles (user_id, plan_start, exam_date, weekly_goal_min)
+  values (uid, p_plan_start, p_exam_date, coalesce(p_weekly_goal_min, 1200));
 
   insert into phases (user_id, name, level, week_start, week_end, start_date, end_date, goals) values
     (uid, 'Fundamentos A1', 'A1', 1, 4,
@@ -76,5 +89,45 @@ begin
 end;
 $$;
 
-grant execute on function public.seed_user_data() to authenticated;
+grant execute on function public.seed_user_data(date, date, integer) to authenticated;
 
+-- Atualiza as datas e a meta do aluno numa única operação. Se o início mudar,
+-- fases e checkpoints são deslocados pelo mesmo intervalo, preservando ajustes
+-- de data que o aluno tenha feito. Sessões, blocos concluídos e notas não mudam.
+create or replace function public.update_plan(
+  p_plan_start date,
+  p_exam_date date,
+  p_weekly_goal_min integer
+)
+returns void
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  uid uuid := auth.uid();
+  delta integer;
+begin
+  if uid is null then
+    raise exception 'Usuário não autenticado';
+  end if;
+  select p_plan_start - p.plan_start into delta from profiles p where p.user_id = uid;
+  if delta is null then
+    raise exception 'Plano ainda não configurado';
+  end if;
+
+  update profiles
+     set plan_start = p_plan_start,
+         exam_date = p_exam_date,
+         weekly_goal_min = p_weekly_goal_min,
+         updated_at = now()
+   where user_id = uid;
+
+  if delta <> 0 then
+    update phases set start_date = start_date + delta, end_date = end_date + delta where user_id = uid;
+    update checkpoints set date = date + delta where user_id = uid;
+  end if;
+end;
+$$;
+
+grant execute on function public.update_plan(date, date, integer) to authenticated;

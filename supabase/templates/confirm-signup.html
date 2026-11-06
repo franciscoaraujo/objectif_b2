@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Confirme seu e-mail · Objectif B2</title>
+  </head>
+  <body style="margin:0;padding:0;background-color:#f1f3fa;font-family:Roboto,'Segoe UI',Helvetica,Arial,sans-serif;color:#1a1b20;">
+    <!-- Texto de pré-visualização (aparece na caixa de entrada) -->
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+      Falta só um clique para ativar sua conta e montar seu plano rumo ao NCLC 7.
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f1f3fa;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+            <!-- Marca -->
+            <tr>
+              <td align="center" style="padding-bottom:20px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td width="40" height="40" align="center" valign="middle" style="background-color:#ffffff;border:1px solid #dfe2eb;border-radius:10px;font-size:22px;line-height:40px;">&#127809;</td>
+                    <td style="padding-left:10px;font-size:20px;font-weight:700;color:#0b1d45;">Objectif B2</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Cartão -->
+            <tr>
+              <td style="background-color:#ffffff;border-radius:24px;overflow:hidden;border:1px solid #dfe2eb;">
+                <!-- Faixa com as cores do Canadá -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td width="25%" height="6" style="background-color:#d52b1e;font-size:0;line-height:0;">&nbsp;</td>
+                    <td width="50%" height="6" style="background-color:#ffffff;font-size:0;line-height:0;">&nbsp;</td>
+                    <td width="25%" height="6" style="background-color:#d52b1e;font-size:0;line-height:0;">&nbsp;</td>
+                  </tr>
+                </table>
+
+                <!-- Faixa azul com o título -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="background-color:#0b1d45;padding:32px 32px 28px 32px;">
+                      <p lang="fr" style="margin:0;font-size:14px;font-weight:700;color:#ff7b70;">Bienvenue !</p>
+                      <h1 style="margin:6px 0 0 0;font-size:26px;line-height:34px;font-weight:700;color:#ffffff;">
+                        Confirme seu e-mail para começar
+                      </h1>
+                      <p style="margin:10px 0 0 0;font-size:15px;line-height:22px;color:#c9d1e6;">
+                        Rumo ao TCF Canada &middot; meta NCLC 7
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Conteúdo -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding:28px 32px 8px 32px;font-size:16px;line-height:24px;color:#44474f;">
+                      Olá! Recebemos o cadastro de <strong style="color:#1a1b20;">{{ .Email }}</strong> no Objectif B2.
+                      Clique no botão abaixo para ativar sua conta.
+                    </td>
+                  </tr>
+
+                  <!-- Botão -->
+                  <tr>
+                    <td align="center" style="padding:20px 32px 8px 32px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td align="center" style="background-color:#455d91;border-radius:999px;">
+                            <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&amp;type=email&amp;next=/email-confirmado" target="_blank"
+                              style="display:inline-block;padding:15px 36px;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:999px;">
+                              Confirmar meu e-mail
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- Próximos passos -->
+                  <tr>
+                    <td style="padding:24px 32px 0 32px;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f3f4fb;border-radius:16px;">
+                        <tr>
+                          <td style="padding:18px 20px 6px 20px;font-size:14px;font-weight:700;color:#1a1b20;">Depois de confirmar:</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:4px 20px;font-size:14px;line-height:21px;color:#44474f;">
+                            <span style="display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border-radius:11px;background-color:#455d91;color:#ffffff;font-size:12px;font-weight:700;margin-right:8px;">1</span>
+                            Escolha quando começar e a data da sua prova.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:4px 20px;font-size:14px;line-height:21px;color:#44474f;">
+                            <span style="display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border-radius:11px;background-color:#455d91;color:#ffffff;font-size:12px;font-weight:700;margin-right:8px;">2</span>
+                            Siga a rotina do dia e registre suas sessões.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:4px 20px 18px 20px;font-size:14px;line-height:21px;color:#44474f;">
+                            <span style="display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border-radius:11px;background-color:#455d91;color:#ffffff;font-size:12px;font-weight:700;margin-right:8px;">3</span>
+                            Acompanhe sua evolução nas quatro competências.
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- Link alternativo -->
+                  <tr>
+                    <td style="padding:24px 32px 0 32px;font-size:13px;line-height:20px;color:#74777f;">
+                      O botão não funciona? Copie e cole este endereço no navegador:<br />
+                      <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&amp;type=email&amp;next=/email-confirmado" target="_blank" style="color:#455d91;word-break:break-all;">{{ .RedirectTo }}?token_hash={{ .TokenHash }}&amp;type=email&amp;next=/email-confirmado</a>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:20px 32px 32px 32px;font-size:13px;line-height:20px;color:#74777f;">
+                      Se você não criou uma conta no Objectif B2, ignore este e-mail. Nenhuma conta será ativada sem a
+                      confirmação.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Rodapé -->
+            <tr>
+              <td align="center" style="padding:24px 16px 0 16px;font-size:12px;line-height:18px;color:#74777f;">
+                Objectif B2 &middot; ferramenta de estudo de francês para o TCF Canada.<br />
+                Não somos afiliados ao Governo do Canadá, ao Governo do Quebec nem à France Éducation international.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

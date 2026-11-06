@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { sm2, type Sm2Quality } from "@/lib/sm2";
+import { TOTAL_WEEKS, planWeek, todayISO } from "@/lib/dates";
+import { redirect } from "next/navigation";
 import type { ActionState } from "@/components/ui";
 
 /* ───────── utilitários ───────── */
@@ -402,3 +404,101 @@ async function simpleDelete(
   return { ok: true };
 }
 
+
+/* ───────── perfil / plano (datas definidas pelo aluno) ───────── */
+const planSchema = z
+  .object({
+    plan_start: dateStr,
+    exam_date: z.preprocess(emptyToUndef, dateStr.optional()),
+    weekly_goal_h: z.coerce
+      .number({ error: "Meta semanal: informe um número." })
+      .min(1, "Meta semanal: mínimo 1 h.")
+      .max(70, "Meta semanal: máximo 70 h."),
+  })
+  .refine((d) => !d.exam_date || d.exam_date >= d.plan_start, {
+    path: ["exam_date"],
+    message: "A data da prova deve ser igual ou posterior ao início do plano.",
+  });
+
+function planArgs(d: z.infer<typeof planSchema>) {
+  return {
+    p_plan_start: d.plan_start,
+    p_exam_date: d.exam_date ?? null,
+    p_weekly_goal_min: Math.round(d.weekly_goal_h * 60),
+  };
+}
+
+/**
+ * Datas do plano não podem ser retroativas: só hoje ou depois.
+ * Uma data já salva no passado pode ser mantida (o plano que já começou continua válido).
+ */
+function pastDateError(
+  d: { plan_start: string; exam_date?: string },
+  current: { plan_start: string; exam_date: string | null } | null,
+): ActionState {
+  const today = todayISO();
+  const errors: Record<string, string> = {};
+  if (d.plan_start < today && d.plan_start !== current?.plan_start) {
+    errors.plan_start = "Início do plano: escolha hoje ou uma data futura.";
+  }
+  if (d.exam_date && d.exam_date < today && d.exam_date !== current?.exam_date) {
+    errors.exam_date = "Data da prova: escolha hoje ou uma data futura.";
+  }
+  return Object.keys(errors).length ? { ok: false, message: "Corrija os campos abaixo:", errors } : null;
+}
+
+/** Primeiro acesso: monta o plano com as datas escolhidas pelo aluno. */
+export async function startPlan(_: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = planSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return validationError(parsed.error);
+  const past = pastDateError(parsed.data, null);
+  if (past) return past;
+  try {
+    const { supabase } = await context();
+    const { error } = await supabase.rpc("seed_user_data", planArgs(parsed.data));
+    if (error) return { ok: false, message: error.message };
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : "Erro inesperado." };
+  }
+  revalidatePath("/", "layout");
+  redirect("/");
+}
+
+export async function saveProfile(_: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = planSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return validationError(parsed.error);
+  try {
+    const { supabase, userId } = await context();
+    const current = await supabase
+      .from("profiles")
+      .select("plan_start,exam_date")
+      .eq("user_id", userId)
+      .single<{ plan_start: string; exam_date: string | null }>();
+    if (current.error) return { ok: false, message: current.error.message };
+    const past = pastDateError(parsed.data, current.data);
+    if (past) return past;
+    const { error } = await supabase.rpc("update_plan", planArgs(parsed.data));
+    if (error) return { ok: false, message: error.message };
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : "Erro inesperado." };
+  }
+  ["/", "/estatisticas", "/checkpoints", "/perfil"].forEach((p) => revalidatePath(p));
+  return { ok: true, message: "Plano atualizado." };
+}
+
+/** O aluno define a data de cada checkpoint; a semana do plano é recalculada a partir dela. */
+const checkpointDateSchema = z.object({ id: z.uuid("Identificador inválido."), date: dateStr });
+export async function saveCheckpointDate(_: ActionState, formData: FormData) {
+  return run(formData, checkpointDateSchema, ["/checkpoints", "/"], async ({ supabase, userId }, d: z.infer<typeof checkpointDateSchema>) => {
+    const current = await supabase.from("checkpoints").select("date").eq("id", d.id).single<{ date: string }>();
+    if (current.error) return fail(current.error);
+    if (d.date < todayISO() && d.date !== current.data.date) {
+      return { message: "Escolha hoje ou uma data futura." };
+    }
+    const profile = await supabase.from("profiles").select("plan_start").eq("user_id", userId).single<{ plan_start: string }>();
+    if (profile.error) return fail(profile.error);
+    const week = Math.min(Math.max(planWeek(d.date, profile.data.plan_start), 1), TOTAL_WEEKS);
+    const { error } = await supabase.from("checkpoints").update({ date: d.date, week }).eq("id", d.id);
+    return error ? fail(error) : null;
+  });
+}

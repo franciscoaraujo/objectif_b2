@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getProfile } from "@/lib/profile";
 import { MobileTopBar, NavigationBar, NavigationDrawer, NavigationRail } from "@/components/navigation";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -7,9 +8,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/login");
 
-  // Seed no primeiro login (função idempotente no banco).
-  const { count } = await supabase.from("phases").select("id", { count: "exact", head: true });
-  if (count === 0) await supabase.rpc("seed_user_data");
+  // Sem perfil (primeiro acesso), redireciona para /comecar.
+  await getProfile();
 
   return (
     <div className="flex min-h-dvh">

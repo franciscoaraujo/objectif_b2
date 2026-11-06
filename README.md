@@ -20,13 +20,51 @@ Navegação: *navigation bar* no celular (5 destinos; "Mais" reúne Livros, Esta
 >
 > Observação apenas de planejamento — nada disso foi implementado ainda.
 
+## Ambientes
+
+| Ambiente | Branch | Banco Supabase | Variáveis |
+| --- | --- | --- | --- |
+| Desenvolvimento | `dev` | local, no Docker (Supabase CLI) | `.env.local` |
+| Homologação | `hml` | projeto `ogcrrcnmguxkmuodfbci` | `.env.hml.local` e Vercel (Preview, branch `hml`) |
+| Produção | `master` | projeto `ppqkixwlkxxehijoxmoi` | Vercel (Production) |
+
+Fluxo: desenvolva na `dev` → merge na `hml` para testar → merge na `master` para publicar.
+
+### Desenvolvimento local (Docker)
+
+Requer o Docker Desktop aberto.
+
+```bash
+npm run db:start    # sobe Postgres, Auth, API, Studio e Mailpit e aplica as migrações
+npm run dev         # app em http://localhost:3000
+```
+
+| Serviço | Endereço |
+| --- | --- |
+| Studio (painel do banco) | http://127.0.0.1:54323 |
+| Mailpit (e-mails de confirmação) | http://127.0.0.1:54324 |
+| API | http://127.0.0.1:54321 |
+
+- `.env.local` aponta para o Supabase local (`npm run db:status` mostra URL e chaves).
+- `npm run db:reset` recria o banco local do zero e reaplica as migrações.
+- `npm run db:stop` desliga os containers.
+- A configuração local fica em `supabase/config.toml`: confirmação de e-mail ligada, modelo de e-mail em português e nenhum dado fictício.
+
+### Homologação
+
+`npm run db:migrate:hml` aplica as migrações no projeto de homologação usando `.env.hml.local`.
+
 ## 1. Criar o projeto no Supabase
 
 1. Em <https://supabase.com/dashboard>, crie um projeto novo e guarde a senha do banco.
 2. Em **Project Settings → API**, copie a **Project URL** e a chave **anon public**.
 3. Em **Authentication → Providers**, mantenha **Email** habilitado.
    - Para testar sem confirmar e-mail, desative *Confirm email*. Com a confirmação ativa, o link enviado volta para `/auth/callback`.
-4. Em **Authentication → URL Configuration**, defina *Site URL* (`http://localhost:3000` em desenvolvimento e a URL da Vercel em produção) e adicione `…/auth/callback` em *Redirect URLs*.
+4. Em **Authentication → URL Configuration**, defina *Site URL* (`http://localhost:3000` em desenvolvimento e a URL da Vercel em produção) e adicione `…/auth/callback**` em *Redirect URLs* (o `**` cobre o `?next=/redefinir-senha` da recuperação de senha).
+
+5. Em **Authentication → Email Templates → Confirm signup**, use o modelo em português:
+   - *Subject*: `Confirme seu e-mail · Objectif B2`
+   - *Body*: cole o conteúdo de `supabase/templates/confirm-signup.html`. O link usa `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email`, validado em `/auth/confirm` (funciona mesmo se o e-mail for aberto em outro navegador ou aparelho) e leva a `/email-confirmado`.
 
 ## 2. Rodar as migrações
 
@@ -34,8 +72,10 @@ As migrações ficam em `supabase/migrations`:
 
 | Arquivo | Conteúdo |
 | --- | --- |
-| `20261105000001_schema.sql` | enums, tabelas, constraints, índices e políticas RLS |
-| `20261105000002_seed_function.sql` | função `seed_user_data()` (fases, materiais, checkpoints e rotina padrão) |
+| `20261105000001_schema.sql` | enums, tabelas (incluindo `profiles`), constraints, índices e políticas RLS |
+| `20261105000002_seed_function.sql` | `seed_user_data(início, prova, meta)` (perfil, fases, materiais, checkpoints e rotina) e `update_plan()` |
+
+Para recomeçar do zero, execute `supabase/reset.sql` no SQL Editor (apaga todos os dados do app, mantém as contas de login) e rode as migrações de novo.
 
 Duas opções:
 
@@ -66,14 +106,17 @@ Todas as tabelas têm `id uuid`, `user_id` (→ `auth.users`, `default auth.uid(
 
 Decisões de normalização: enums para habilidade (`grammaire, vocabulaire, CO, CE, EE, EO`), nível, tipo de material, status, tipo de checkpoint, categoria de erro e gênero; `chapters.number` único por material; `mock_exams.checkpoint_id` opcional liga a nota ao checkpoint; `CHECK` de faixa (CO/CE 0–699, EE/EO 0–20). `vocabulary` guarda também `repetitions` (necessário ao SM-2).
 
-### Seed no primeiro login
+### Primeiro acesso: o aluno define as datas
 
-Ao abrir qualquer tela autenticada, o app verifica se o usuário tem fases; se não tiver, chama `rpc('seed_user_data')`, que cria (de forma idempotente):
+O app não impõe datas. Sem perfil, qualquer tela autenticada redireciona para **/comecar**, onde o aluno informa o início do plano (qualquer dia), a data da prova (opcional) e a meta semanal. Então `rpc('seed_user_data')` cria (de forma idempotente):
 
+- o perfil com essas datas;
 - 4 fases: A1 (sem. 1–4), A2 (5–10), B1 (11–18), B2/TCF (19–26);
 - 9 materiais (Grammaire progressive, Les 500 exercices A1/A2/B1, Défi 1 e 2, TV5Monde, RFI, Simulados TCF);
-- 8 checkpoints: testes de fim de fase (sem. 4, 10, 18), inscrição (sem. 14) e simulados (sem. 20, 22, 24, 26);
+- 8 checkpoints sugeridos: testes de fim de fase (sem. 4, 10, 18), inscrição (sem. 14) e simulados (sem. 20, 22, 24, 26). O aluno muda a data de cada um em **Provas**;
 - rotina semanal padrão de 20 h.
+
+Em **Meu plano**, o aluno muda início, prova e meta; `update_plan()` desloca fases e checkpoints pelo mesmo intervalo, preservando os ajustes feitos.
 
 Os capítulos não vêm no seed (os títulos e páginas dependem da sua edição): cadastre em **Livros** um a um ou use **Em lote**.
 

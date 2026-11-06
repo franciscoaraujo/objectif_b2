@@ -94,3 +94,9 @@ export type VocabWord = {
   next_review_at: string;
 };
 
+export type Profile = {
+  user_id: string;
+  plan_start: string;
+  exam_date: string | null;
+  weekly_goal_min: number;
+};

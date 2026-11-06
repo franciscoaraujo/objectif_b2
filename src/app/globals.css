@@ -58,9 +58,7 @@
   --md-navigation-drawer-container-color: var(--md-sys-color-surface-container-low);
   --md-dialog-container-color: var(--md-sys-color-surface-container-high);
   --md-menu-container-color: var(--md-sys-color-surface-container);
-  /* Tema Canadá: ação principal em vermelho, como na página de vendas. */
-  --md-filled-button-container-color: #d52b1e;
-  --md-filled-button-label-text-color: #ffffff;
+  /* Botões usam o azul primário do tema (tokens M3). */
   --md-dialog-container-shape: 28px;
 }
 

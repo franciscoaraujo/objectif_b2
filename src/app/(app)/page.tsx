@@ -1,10 +1,8 @@
 import Link from "next/link";
 import { createClient, must } from "@/lib/queries";
+import { getProfile } from "@/lib/profile";
 import {
-  PLAN_END,
-  PLAN_START,
   TOTAL_WEEKS,
-  WEEKLY_GOAL_MIN,
   addDays,
   diffDays,
   formatBR,
@@ -29,15 +27,17 @@ export const metadata = { title: "Início" };
 
 export default async function HomePage() {
   const supabase = await createClient();
+  const profile = await getProfile();
+  const goalMin = profile.weekly_goal_min;
   const today = todayISO();
   const monday = mondayOf(today);
-  const rawWeek = planWeek(today);
+  const rawWeek = planWeek(today, profile.plan_start);
   const week = Math.min(Math.max(rawWeek, 1), TOTAL_WEEKS);
   const weekdayToday = weekdayOf(today);
 
   const [phases, checkpoints, sessions, blocks, completions] = await Promise.all([
     supabase.from("phases").select("*").order("week_start").then(must<Phase[]>),
-    supabase.from("checkpoints").select("*").order("week").then(must<Checkpoint[]>),
+    supabase.from("checkpoints").select("*").order("date").then(must<Checkpoint[]>),
     supabase.from("study_sessions").select("*").gte("date", monday).lte("date", addDays(monday, 6)).then(must<StudySession[]>),
     supabase.from("weekly_blocks").select("*").eq("weekday", weekdayToday).order("position").then(must<WeeklyBlock[]>),
     supabase.from("block_completions").select("*").eq("week_start_date", monday).then(must<BlockCompletion[]>),
@@ -46,16 +46,16 @@ export default async function HomePage() {
   const phase = phaseForWeek(phases, week);
   const weekMin = sessions.reduce((s, x) => s + x.duration_min, 0);
   const todayMin = sessions.filter((s) => s.date === today).reduce((s, x) => s + x.duration_min, 0);
-  const daysToExam = diffDays(today, PLAN_END);
+  const daysToExam = diffDays(today, profile.exam);
   const nextCheckpoint = checkpoints.find((c) => !c.done && c.date >= today) ?? checkpoints.find((c) => !c.done);
   const done = new Set(completions.filter((c) => c.done).map((c) => c.block_id));
   const planned = blocks.reduce((s, b) => s + b.duration_min, 0);
   const doneBlocks = blocks.filter((b) => done.has(b.id)).length;
-  const ratio = weekMin / WEEKLY_GOAL_MIN;
+  const ratio = weekMin / goalMin;
 
   const notStarted = rawWeek === 0;
   const subtitle = notStarted
-    ? `O plano começa em ${formatBR(PLAN_START)} (${diffDays(today, PLAN_START)} dias)`
+    ? `O plano começa em ${formatBR(profile.plan_start)} (${diffDays(today, profile.plan_start)} dias)`
     : rawWeek > TOTAL_WEEKS
       ? "Plano concluído"
       : `${formatShort(monday)} a ${formatShort(addDays(monday, 6))}`;
@@ -83,15 +83,15 @@ export default async function HomePage() {
           </div>
           <p className="mt-2 tabular">
             <span className="type-display-small">{hours(weekMin)}</span>
-            <span className="type-title-large opacity-80"> / {hours(WEEKLY_GOAL_MIN)} h</span>
+            <span className="type-title-large opacity-80"> / {hours(goalMin)} h</span>
           </p>
           <div className="mt-4">
             <Progress value={ratio} label="Horas da semana em relação à meta" />
           </div>
           <p className="mt-3 type-body-small opacity-80">
-            {weekMin >= WEEKLY_GOAL_MIN
+            {weekMin >= goalMin
               ? "Meta da semana atingida."
-              : `Faltam ${formatDuration(WEEKLY_GOAL_MIN - weekMin)} para a meta.`}
+              : `Faltam ${formatDuration(goalMin - weekMin)} para a meta.`}
           </p>
         </Surface>
 
@@ -99,7 +99,10 @@ export default async function HomePage() {
           <Surface tone="container">
             <p className="text-on-surface-variant type-label-medium">Dias até a prova</p>
             <p className="mt-1 type-headline-medium tabular">{Math.max(daysToExam, 0)}</p>
-            <p className="text-on-surface-variant type-body-small">até {formatBR(PLAN_END)}</p>
+            <p className="text-on-surface-variant type-body-small">
+              até {formatBR(profile.exam)}
+              {!profile.exam_date && " (fim do plano)"}
+            </p>
           </Surface>
           <Surface tone="container">
             <p className="text-on-surface-variant type-label-medium">Hoje</p>
